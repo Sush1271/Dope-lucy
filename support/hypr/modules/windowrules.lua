@@ -47,3 +47,26 @@ hl.window_rule({
     size   = "1180 800",
     center = true,
 })
+
+
+--------------------------------
+---- WORKSPACE ASSIGNMENTS -----
+--------------------------------
+
+-- HDMI-A-1 → workspaces 1-5
+for i = 1, 5 do
+    hl.workspace_rule({
+        workspace = tostring(i),
+        monitor = "HDMI-A-1",
+        persistent = true,
+    })
+end
+
+-- DP-1 → workspaces 6-10
+for i = 6, 10 do
+    hl.workspace_rule({
+        workspace = tostring(i),
+        monitor = "DP-1",
+        persistent = true,
+    })
+end

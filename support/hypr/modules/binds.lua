@@ -68,9 +68,9 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Function keys
-hl.bind("F1",  hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),               { locked = true })
-hl.bind("F2",  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),                 { locked = true, repeating = true })
-hl.bind("F3",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),           { locked = true, repeating = true })
+--hl.bind("F1",  hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),               { locked = true })
+--hl.bind("F2",  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),                 { locked = true, repeating = true })
+--hl.bind("F3",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),           { locked = true, repeating = true })
 -- F7: reserved
 hl.bind("F8",  hl.dsp.exec_cmd("rfkill toggle all"),                                        { locked = true })
 --hl.bind("F9",  hl.dsp.exec_cmd(terminal),                                                    { locked = true })
