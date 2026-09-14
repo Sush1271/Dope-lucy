@@ -99,6 +99,7 @@ hl.bind("Print", hl.dsp.exec_cmd("qs ipc call snap toggle"), { locked = true })
 hl.bind("SUPER + Print", hl.dsp.exec_cmd("qs ipc call screenshot full"), { locked = true })
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("qs ipc call snap toggle"), { locked = true })
 
+
 -- Super + Shift + T → drag a region and copy the text inside it (ocr)
 hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("qs ipc call snap text"), { locked = true })
 

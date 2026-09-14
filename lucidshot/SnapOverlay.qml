@@ -17,6 +17,7 @@ PanelWindow {
     property string openMode: "camera"
     property string colorFormat: "hex"
     property string freezePath: Quickshell.env("HOME") + "/.cache/quickshell-snap-freeze.png"
+    property string captureGeometry: ""
 
     property string recordingState: "idle"
     property int recordSeconds: 0
@@ -45,7 +46,20 @@ PanelWindow {
     property real busyW: 0
     property real busyH: 0
 
-    readonly property real freezeScale: (freezeImg.implicitWidth > 0 && snapWindow.width > 0) ? (freezeImg.implicitWidth / snapWindow.width) : 1
+    readonly property real freezeScale: (freezeImg.implicitWidth > 0 && snapWindow.width > 0)
+    ? (freezeImg.implicitWidth / snapWindow.width)
+    : 1
+
+    readonly property string freezeGeometry: {
+    if (!snapWindow.screen)
+        return "0,0 " + Math.round(snapWindow.width) + "x" + Math.round(snapWindow.height);
+
+    return Math.round(snapWindow.screen.x) + "," +
+           Math.round(snapWindow.screen.y) + " " +
+           Math.round(snapWindow.screen.width) + "x" +
+           Math.round(snapWindow.screen.height);}
+    Component.onCompleted: console.log("SNAP DEBUG:", snapWindow.width, "x", snapWindow.height, "freeze:", freezeImg.implicitWidth, "x", freezeImg.implicitHeight)
+
 
     readonly property color shadeColor: Theme.alpha(Theme.shadow, 0.55)
     readonly property bool shadeVisible: contentVisible && activeTool !== "fullscreen" && captureMode !== "color"
@@ -339,7 +353,7 @@ function stopRecordingBackend() {
             return;
         if (snapWindow.open && !snapWindow.toolbarHidden)
             return;
-        freezeProcess.running = true;
+        monitorProcess.running = true;
     }
 
     function resetToFreshSession() {
@@ -387,32 +401,78 @@ function stopRecordingBackend() {
         }
     }
 
-    Process {
-        id: freezeProcess
 
-        property bool quiet: false
 
-        command: ["sh", "-c", "grim -l 0 '" + snapWindow.freezePath + "'"]
+Process {
+    id: monitorProcess
 
-        onExited: (code) => {
-            if (freezeProcess.quiet) {
-                freezeProcess.quiet = false;
-                if (code === 0) {
-                    freezeImg.source = "";
-                    freezeImg.source = "file://" + snapWindow.freezePath;
+    command: ["hyprctl", "monitors", "-j"]
+
+    stdout: StdioCollector {
+        onStreamFinished: {
+            try {
+                var monitors = JSON.parse(text);
+                var focused = null;
+
+                for (var i = 0; i < monitors.length; i++) {
+                    if (monitors[i].focused) {
+                        focused = monitors[i];
+                        break;
+                    }
                 }
-                snapWindow.contentVisible = true;
-                snapWindow.animateContent = true;
-                return;
+
+                if (focused) {
+                    snapWindow.captureGeometry =
+                        Math.round(focused.x) + "," +
+                        Math.round(focused.y) + " " +
+                        Math.round(focused.width) + "x" +
+                        Math.round(focused.height);
+
+                    console.log("SNAP: focused monitor geometry =", snapWindow.captureGeometry);
+
+                    freezeProcess.running = true;
+                } else {
+                    console.log("SNAP: no focused monitor found");
+                }
+            } catch (e) {
+                console.log("SNAP: failed to parse monitor data:", e);
             }
-            if (code !== 0)
-                return;
-            freezeImg.source = "";
-            freezeImg.source = "file://" + snapWindow.freezePath;
-            snapWindow.open = true;
-            snapWindow.resetToFreshSession();
         }
     }
+}
+
+Process {
+    id: freezeProcess
+
+    property bool quiet: false
+
+    command: [
+        "sh",
+        "-c",
+        "grim -l 0 -g '" + snapWindow.captureGeometry + "' '" + snapWindow.freezePath + "'"
+    ]
+
+    onExited: (code) => {
+        if (freezeProcess.quiet) {
+            freezeProcess.quiet = false;
+            if (code === 0) {
+                freezeImg.source = "";
+                freezeImg.source = "file://" + snapWindow.freezePath;
+            }
+            snapWindow.contentVisible = true;
+            snapWindow.animateContent = true;
+            return;
+        }
+
+        if (code !== 0)
+            return;
+
+        freezeImg.source = "";
+        freezeImg.source = "file://" + snapWindow.freezePath;
+        snapWindow.open = true;
+        snapWindow.resetToFreshSession();
+    }
+}
 
     function startColorPick() {
         snapWindow.colorPickRequested(snapWindow.colorFormat);
