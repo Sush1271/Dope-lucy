@@ -8,3 +8,7 @@ hl.env("XCURSOR_SIZE", "24")
 -- needs the aosp-cursors package
 -- hl.env("XCURSOR_THEME", "aosp-cursors")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+
+-- set from lucid settings > environment
+hl.env("XCURSOR_THEME", "default")
+hl.env("QS_ICON_THEME", "FairyWren_Dark")
